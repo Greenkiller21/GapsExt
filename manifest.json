@@ -1,0 +1,20 @@
+{
+  "name": "Gaps",
+  "description": "Extension for Gaps - Grades",
+  "version": "1.0",
+  "manifest_version": 3,
+  "background": {
+    "service_worker": "background.js"
+  },
+  "options_page": "options.html",
+  "permissions": [
+	"storage",
+	"activeTab",
+	"scripting",
+	"cookies"
+  ],
+  "host_permissions": ["*://gaps.heig-vd.ch/*"],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
