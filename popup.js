@@ -6,17 +6,24 @@ const COOKIE_GAPS = {
 
 let username = '';
 let password = '';
+var newGradesList = {};
 
-reloadGapsGrades();
+reloadSettings().then(async () => await reloadGapsGrades());
 
-chrome.storage.sync.get("loginInfos", ({ loginInfos }) => {
-  username = loginInfos.usr;
-  password = loginInfos.pwd;
-});
+async function reloadSettings() {
+  var p = new Promise(function(resolve, reject) {
+    chrome.storage.local.get("loginInfos", ({ loginInfos }) => {
+      resolve(loginInfos);
+    });
+  });
+
+  var obj = await p;
+  username = obj.usr;
+  password = obj.pwd;
+}
 
 async function reloadGapsGrades() {
-  bglog("start");
-  document.getElementById('myDiv').innerHTML = "start";
+  setStatus("Loading grades ...");
   await removeAllCookies(COOKIE_GAPS);
 
   let formDataLogin = new FormData();
@@ -30,7 +37,7 @@ async function reloadGapsGrades() {
       method: 'POST',
       mode: 'no-cors'
     }
-  ).then((htmlLogin) => {
+  ).then(htmlLogin => {
     htmlLogin.text().then(textLogin => {
       var args = /show_CCs\(\s*([^)]+?)\s*\);/.exec(textLogin);
       if (args[1]) {
@@ -52,29 +59,13 @@ async function reloadGapsGrades() {
         text = text.substring(3, text.length - 1);
         text = text.replaceAll('\\/', '/');
         text = text.replaceAll('\\"', '"');
+        text = unicodeToChar(text);
 
-        var el = document.createElement('div');
-        el.innerHTML = text;
-        var grades = getGrades(el);
-        bglog(grades);
-        grades = await getGradesNotSeen(grades);
-        bglog(grades);
-        var table = document.createElement('table');
-        for (var course in grades) {
-          var th = document.createElement('th');
-          th.innerText = course;
-          table.appendChild(th);
-          grades[course].forEach(grade => {
-            var tr = document.createElement('tr');
-            for (var info in grade) {
-              var td = document.createElement('td');
-              td.innerText = grade[info];
-              tr.appendChild(td);
-            }
-            table.appendChild(tr);
-          });
-        }
-        document.getElementById('myDiv').appendChild(table);
+        var table = getHtmlFromText(text);
+        newGradesList = getGrades(table);
+        var grades = await getGradesNotSeen(newGradesList);
+        setStatus();
+        showGrades(grades);
       });
     }).catch(error => console.log("ERROR"));
   })
@@ -96,8 +87,7 @@ function removeAllCookies(cookieType) {
   return promise;
 }
 
-function getGrades(div) {
-  var table = div.firstElementChild
+function getGrades(table) {
   var rows = table.rows;
 
   var grades = {};
@@ -140,8 +130,7 @@ async function getGradesNotSeen(newCourses) {
       for (newCourse in newCourses) {
         var newGrades = newCourses[newCourse];
         newGrades.forEach(newGrade => {
-          bglog(newGrade);
-          if (!grades[newCourse] || !grades[newCourse].contains(newGrade)) {
+          if (!grades[newCourse] || !contains(grades[newCourse], newGrade)) {
             if (!gradesNotSeen[newCourse]) {
               gradesNotSeen[newCourse] = [];
             }
@@ -153,7 +142,203 @@ async function getGradesNotSeen(newCourses) {
     });
   });
 
-  return await p;
+  return p;
+}
+
+function contains(tab, def) {
+  var mustReturn = false;
+  tab.forEach(ele => {
+    if (deepCompare(ele, def)){
+      mustReturn = true;
+      return;
+    }
+  });
+  return mustReturn;
+}
+
+function getHtmlFromText(text) {
+  var el = document.createElement('div');
+  el.innerHTML = text;
+  return el.firstElementChild;
+}
+
+function setStatus(text) {
+  var statusDiv = document.getElementById('statusDiv');
+  statusDiv.style.display = text ? "block" : "none";
+  statusDiv.innerHTML = text;
+}
+
+function showGrades(grades) {
+  document.getElementById('dataDiv').firstChild?.remove();
+  var table = document.createElement('table');
+  for (var course in grades) {
+    var th = document.createElement('th');
+    th.innerText = course;
+    table.appendChild(th);
+    grades[course].forEach(grade => {
+      var tr = document.createElement('tr');
+      for (var info in grade) {
+        var td = document.createElement('td');
+        td.innerText = grade[info];
+        tr.appendChild(td);
+      }
+      var td = document.createElement('td');
+      var i = document.createElement('input');
+      i.type = 'button';
+      var courseCopy = course;
+      i.onclick = async function() {
+        await setAsSeen(courseCopy, grade);
+        var grades = await getGradesNotSeen(newGradesList);
+        showGrades(grades);
+      };
+      td.appendChild(i);
+      tr.appendChild(td);
+
+      table.appendChild(tr);
+    });
+  }
+  document.getElementById('dataDiv').appendChild(table);
+}
+
+async function setAsSeen(course, grade) {
+  var p = new Promise(function(resolve, reject) {
+    chrome.storage.sync.get("grades", ({ grades }) => {
+      if (!grades[course]) {
+        grades[course] = [];
+      }
+      grades[course].push(grade);
+      chrome.storage.sync.set({ grades });
+      resolve();
+    });
+  });
+
+  await p;
+}
+
+function unicodeToChar(text) {
+  return text.replace(/\\u[\dA-F]{4}/gi, 
+         function (match) {
+              return String.fromCharCode(parseInt(match.replace(/\\u/g, ''), 16));
+         });
+}
+
+///
+/// Utils
+///
+
+function deepCompare() {
+  var i, l, leftChain, rightChain;
+
+  function compare2Objects(x, y) {
+    var p;
+
+    // remember that NaN === NaN returns false
+    // and isNaN(undefined) returns true
+    if (isNaN(x) && isNaN(y) && typeof x === 'number' && typeof y === 'number') {
+         return true;
+    }
+
+    // Compare primitives and functions.     
+    // Check if both arguments link to the same object.
+    // Especially useful on the step where we compare prototypes
+    if (x === y) {
+        return true;
+    }
+
+    // Works in case when functions are created in constructor.
+    // Comparing dates is a common scenario. Another built-ins?
+    // We can even handle functions passed across iframes
+    if ((typeof x === 'function' && typeof y === 'function') ||
+       (x instanceof Date && y instanceof Date) ||
+       (x instanceof RegExp && y instanceof RegExp) ||
+       (x instanceof String && y instanceof String) ||
+       (x instanceof Number && y instanceof Number)) {
+        return x.toString() === y.toString();
+    }
+
+    // At last checking prototypes as good as we can
+    if (!(x instanceof Object && y instanceof Object)) {
+        return false;
+    }
+
+    if (x.isPrototypeOf(y) || y.isPrototypeOf(x)) {
+        return false;
+    }
+
+    if (x.constructor !== y.constructor) {
+        return false;
+    }
+
+    if (x.prototype !== y.prototype) {
+        return false;
+    }
+
+    // Check for infinitive linking loops
+    if (leftChain.indexOf(x) > -1 || rightChain.indexOf(y) > -1) {
+         return false;
+    }
+
+    // Quick checking of one object being a subset of another.
+    // todo: cache the structure of arguments[0] for performance
+    for (p in y) {
+        if (y.hasOwnProperty(p) !== x.hasOwnProperty(p)) {
+            return false;
+        }
+        else if (typeof y[p] !== typeof x[p]) {
+            return false;
+        }
+    }
+
+    for (p in x) {
+        if (y.hasOwnProperty(p) !== x.hasOwnProperty(p)) {
+            return false;
+        }
+        else if (typeof y[p] !== typeof x[p]) {
+            return false;
+        }
+
+        switch (typeof (x[p])) {
+            case 'object':
+            case 'function':
+
+                leftChain.push(x);
+                rightChain.push(y);
+
+                if (!compare2Objects (x[p], y[p])) {
+                    return false;
+                }
+
+                leftChain.pop();
+                rightChain.pop();
+                break;
+
+            default:
+                if (x[p] !== y[p]) {
+                    return false;
+                }
+                break;
+        }
+    }
+
+    return true;
+  }
+
+  if (arguments.length < 1) {
+    return true; //Die silently? Don't know how to handle such case, please help...
+    // throw "Need two or more arguments to compare";
+  }
+
+  for (i = 1, l = arguments.length; i < l; i++) {
+
+      leftChain = []; //Todo: this can be cached
+      rightChain = [];
+
+      if (!compare2Objects(arguments[0], arguments[i])) {
+          return false;
+      }
+  }
+
+  return true;
 }
 
 ///

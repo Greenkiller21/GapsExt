@@ -1,13 +1,13 @@
 console.clear();
 
 chrome.runtime.onInstalled.addListener(() => {
-  chrome.storage.sync.get("loginInfos", ({ loginInfos }) => {
+  chrome.storage.local.get("loginInfos", ({ loginInfos }) => {
     if (!loginInfos) {
       loginInfos = {
         usr: '',
         pwd: ''
       }
-      chrome.storage.sync.set({ loginInfos });
+      chrome.storage.local.set({ loginInfos });
     }
   });
   chrome.storage.sync.get("grades", ({ grades }) => {

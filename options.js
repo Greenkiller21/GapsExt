@@ -9,7 +9,7 @@ btnOk.addEventListener('click', async () => {
 });
 
 function loadInputs() {
-  chrome.storage.sync.get("loginInfos", ({ loginInfos }) => {
+  chrome.storage.local.get("loginInfos", ({ loginInfos }) => {
     valUsr.value = loginInfos.usr;
     valPwd.value = loginInfos.pwd;
   });
@@ -21,5 +21,5 @@ function submitInputs() {
     pwd: valPwd.value
   };
 
-  chrome.storage.sync.set({ loginInfos });
+  chrome.storage.local.set({ loginInfos });
 }
