@@ -1,0 +1,89 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&display=swap');
+
+
+*{
+   font-family: 'Montserrat', sans-serif;
+   margin: 0px;
+   padding: 0px;
+}
+
+.main{
+   display: flex;
+   height: 100%;
+   width: 100%;
+   backdrop-filter: blur(3rem);
+}
+
+.LoginCard{
+   display: flex;
+   flex-direction: column;
+   background-color: white;
+   padding: 5rem;
+   margin: auto;
+   border-radius: 1rem;
+   position: relative;
+}
+.loginTitle{
+   display: flex;
+   justify-content: center;
+   margin-bottom: 2rem;
+   /*text*/
+   text-transform: uppercase;
+   font-size: 3rem;
+   font-weight: bold;
+   color: #0099ff;
+}
+body{
+   height: 100vh;
+   width: 100vw;
+   position: absolute;
+   bottom: 0px;
+
+   background-color: rgb(44, 44, 44);
+}
+
+input{
+   padding: .75rem;
+   margin:  .75rem;
+   font-size: 1rem;
+   border-radius: 0.5rem;
+}
+
+input[type=text] {
+   border: 3px solid #ccc;
+}
+
+
+input[type=text]:focus {
+   border: 3px solid #555;
+}
+
+input[type=password] {
+   border: 3px solid #ccc;
+}
+
+
+input[type=password]:focus {
+   border: 3px solid #555;
+}
+
+input[type=submit] {
+   background-color: #0099ff;
+   color: white;
+   border: none;
+   border: 3px solid #0099ff;    
+}
+
+input[type=submit]:hover {
+   background-color: white;
+   color: #0099ff;
+   border: 3px solid #0099ff;  
+}
+
+
+
+svg{
+   position: fixed;
+   bottom: 0;
+   right: 0;
+}
