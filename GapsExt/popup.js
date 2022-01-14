@@ -31,6 +31,8 @@ async function reloadGapsGrades() {
   formDataLogin.append('password', password);
   formDataLogin.append('submit', 'Enter');
 
+  let gradesCount = 0;
+
   fetch(URL,
     {
       body: formDataLogin,
@@ -64,11 +66,18 @@ async function reloadGapsGrades() {
         var table = getHtmlFromText(text);
         newGradesList = getGrades(table);
         var grades = await getGradesNotSeen(newGradesList);
-        setStatus();
-        showGrades(grades);
+        if (Object.keys(grades).length === 0) {
+          setStatus("No grades...");
+        } else {
+          setStatus();
+          showGrades(grades);
+          gradesCount = Object.keys(grades).length;
+        }
       });
     }).catch(error => console.log("ERROR"));
-  })
+  });
+
+  return gradesCount;
 }
 
 function removeAllCookies(cookieType) {
@@ -131,10 +140,12 @@ async function getGradesNotSeen(newCourses) {
         var newGrades = newCourses[newCourse];
         newGrades.forEach(newGrade => {
           if (!grades[newCourse] || !contains(grades[newCourse], newGrade)) {
-            if (!gradesNotSeen[newCourse]) {
-              gradesNotSeen[newCourse] = [];
+            if (newGrade.mark != '-') {
+              if (!gradesNotSeen[newCourse]) {
+                gradesNotSeen[newCourse] = [];
+              }
+              gradesNotSeen[newCourse].push(newGrade);
             }
-            gradesNotSeen[newCourse].push(newGrade);
           }
         });
       }

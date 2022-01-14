@@ -8,10 +8,10 @@
   },
   "options_page": "options.html",
   "permissions": [
-	"storage",
-	"activeTab",
-	"scripting",
-	"cookies"
+    "storage",
+    "activeTab",
+    "scripting",
+    "cookies"
   ],
   "host_permissions": ["*://gaps.heig-vd.ch/*"],
   "action": {

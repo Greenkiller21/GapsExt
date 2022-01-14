@@ -1,6 +1,6 @@
 console.clear();
 
-chrome.runtime.onInstalled.addListener(() => {
+chrome.runtime.onInstalled.addListener(async () => {
   chrome.storage.local.get("loginInfos", ({ loginInfos }) => {
     if (!loginInfos) {
       loginInfos = {
@@ -10,12 +10,20 @@ chrome.runtime.onInstalled.addListener(() => {
       chrome.storage.local.set({ loginInfos });
     }
   });
+
   chrome.storage.sync.get("grades", ({ grades }) => {
     if (!grades) {
       grades = {}
       chrome.storage.sync.set({ grades });
     }
   });
+
+  /*var popups = chrome.extension.getViews({type: "popup"});
+  if (popups.length > 0) {
+    var gradesCount = await popups[0].reloadGapsGrades();
+    await chrome.action.setBadgeText({ text: gradesCount });
+    await chrome.action.setBadgeBackgroundColor({ color: '#FFA500' });
+  }*/
 });
 
 ///
