@@ -13,6 +13,12 @@
     "scripting",
     "cookies"
   ],
+  "content_scripts": [
+    {
+      "matches": ["*://cyberlearn.hes-so.ch/*"],
+      "js": ["cyberlearn.js"]
+    }
+  ],
   "host_permissions": ["*://gaps.heig-vd.ch/*"],
   "action": {
     "default_popup": "popup.html"
