@@ -1,3 +1,20 @@
+/*
+  Supression du ?forcedownlaod=1 dans les liens
+*/
+var fd = document.querySelectorAll("a");
+fd.forEach((el) => {
+  if (el.href.includes("?forcedownload=1")) {
+    el.href = el.href.split("?forcedownload=1")[0];
+  }
+  if (el.href.endsWith(".pdf")) {
+    el.target = "_blank";
+  }
+});
+
+
+/*
+  Supression des cours avec la touche <DELETE>
+*/
 var courses = document.querySelectorAll(".nav .mycourse .dropdown-menu a.dropdown-item");
 var target = null;
 
