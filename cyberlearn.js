@@ -1,40 +1,45 @@
+let openInNewTab = [ '.pdf', '.txt', '.cpp' ];
+
 /*
   Supression du ?forcedownlaod=1 dans les liens
 */
-var fd = document.querySelectorAll("a");
+var fd = document.querySelectorAll('a');
 fd.forEach((el) => {
-  if (el.href.includes("?forcedownload=1")) {
-    el.href = el.href.split("?forcedownload=1")[0];
+  var forceDownload = '?forcedownload=1';
+  if (el.href.includes(forceDownload)) {
+    el.href = el.href.split(forceDownload)[0];
   }
-  if (el.href.endsWith(".pdf")) {
-    el.target = "_blank";
-  }
+  openInNewTab.forEach((ext) => {
+    if (el.href.endsWith(ext)) {
+      el.target = '_blank';
+    }
+  });
 });
 
 
 /*
   Supression des cours avec la touche <DELETE>
 */
-var courses = document.querySelectorAll(".nav .mycourse .dropdown-menu a.dropdown-item");
+var courses = document.querySelectorAll('.nav .mycourse .dropdown-menu a.dropdown-item');
 var target = null;
 
 document.addEventListener('keydown', function(ev) {
-  if (ev.key == "Delete" && target) {
+  if (ev.key == 'Delete' && target) {
     var courseId = target.href.split("?id=")[1];
     if (!courseId) return;
-    var currentStorage = localStorage.getItem("toRemoveFromList");
-    if (!currentStorage) currentStorage = "";
+    var currentStorage = localStorage.getItem('toRemoveFromList');
+    if (!currentStorage) currentStorage = '';
     if (isIn(courseId, currentStorage)) return;
-    localStorage.setItem("toRemoveFromList", currentStorage + ";" + courseId);
+    localStorage.setItem('toRemoveFromList', currentStorage + ';' + courseId);
     target.remove();
   }
 });
 
 courses.forEach((el) => {
-  var courseId = el.href.split("?id=")[1];
+  var courseId = el.href.split('?id=')[1];
   if (!courseId) return;
-  var currentStorage = localStorage.getItem("toRemoveFromList");
-  if (!currentStorage) currentStorage = "";
+  var currentStorage = localStorage.getItem('toRemoveFromList');
+  if (!currentStorage) currentStorage = '';
   if (isIn(courseId, currentStorage)) {
     el.remove();
     return;
