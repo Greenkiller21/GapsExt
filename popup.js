@@ -155,13 +155,19 @@ async function getGradesNotSeen(newCourses) {
 
 function contains(tab, def) {
   var mustReturn = false;
+  var hashedGrade = hashGrade(def);
   tab.forEach(ele => {
-    if (deepCompare(ele, def)){
+    //if (deepCompare(ele, def)){
+    if (ele === hashedGrade){
       mustReturn = true;
       return;
     }
   });
   return mustReturn;
+}
+
+function hashGrade(grade) {
+  return hashString(JSON.stringify(grade));
 }
 
 function getHtmlFromText(text) {
@@ -223,14 +229,30 @@ async function setAsSeen(course, grade) {
       if (!grades[course]) {
         grades[course] = [];
       }
-      grades[course].push(grade);
+      grades[course].push(hashGrade(grade));
       chrome.storage.sync.set({ grades });
       resolve();
     });
   });
 
-  await p;
+  return p;
 }
+
+///
+/// Utils
+///
+
+function hashString(str, seed = 0) {
+  let h1 = 0xdeadbeef ^ seed, h2 = 0x41c6ce57 ^ seed;
+  for (let i = 0, ch; i < str.length; i++) {
+      ch = str.charCodeAt(i);
+      h1 = Math.imul(h1 ^ ch, 2654435761);
+      h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1>>>16), 2246822507) ^ Math.imul(h2 ^ (h2>>>13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2>>>16), 2246822507) ^ Math.imul(h1 ^ (h1>>>13), 3266489909);
+  return 4294967296 * (2097151 & h2) + (h1>>>0);
+};
 
 function unicodeToChar(text) {
   return text.replace(/\\u[\dA-F]{4}/gi, 
@@ -238,10 +260,6 @@ function unicodeToChar(text) {
     return String.fromCharCode(parseInt(match.replace(/\\u/g, ''), 16));
   });
 }
-
-///
-/// Utils
-///
 
 function deepCompare() {
   var i, l, leftChain, rightChain;
