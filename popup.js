@@ -40,15 +40,10 @@ async function reloadGapsGrades() {
       mode: 'no-cors'
     }
   ).then(htmlLogin => {
-    htmlLogin.text().then(textLogin => {
-      var args = /show_CCs\(\s*([^)]+?)\s*\);/.exec(textLogin);
-      if (args[1]) {
-        args = args[1].split(/\s*,\s*/);
-      }
-
+    htmlLogin.text().then(_ => {
       let formDataGrades = new FormData();
-      formDataGrades.append('rs', 'getStudentCCs');
-      formDataGrades.append('rsargs', '[' + args[0] + ',' + args[1] + ',null]');
+      formDataGrades.append('rs', 'smartReplacePart');
+      formDataGrades.append('rsargs', '["result", "result", null, null, null, null]');
 
       fetch(URL, 
         {
@@ -58,24 +53,23 @@ async function reloadGapsGrades() {
         }
       ).then(async html => {
         let text = await html.text();
-        text = text.substring(3, text.length - 1);
+        text = text.substring(7, text.length - 5); //+:"@££@ (at the start) et @££@" (at the end)
         text = text.replaceAll('\\/', '/');
         text = text.replaceAll('\\"', '"');
         text = unicodeToChar(text);
 
         var table = getHtmlFromText(text);
+        table = table.getElementsByClassName('displayArray')[0];
+
         newGradesList = getGrades(table);
         var grades = await getGradesNotSeen(newGradesList);
-        if (Object.keys(grades).length === 0) {
-          setStatus("No grades...");
-        } else {
-          setStatus();
-          showGrades(grades);
-          gradesCount = Object.keys(grades).length;
-        }
+
+        setStatus();
+        showGrades(grades);
+        gradesCount = Object.keys(grades).length;
       });
-    }).catch(error => console.log("ERROR"));
-  });
+    }).catch(error => setStatus('Error fetching grades : ' + error));
+  }).catch(error => setStatus('Error logging in : ' + error));
 
   return gradesCount;
 }
@@ -86,7 +80,6 @@ function removeAllCookies(cookieType) {
   )
   promise.then(cookies => {
     for (var i = 0; i < cookies.length; i++) {
-      console.log(cookies[i]);
       chrome.cookies.remove({
         name: cookies[i].name,
         url: WEBSITE + cookies[i].path
@@ -129,6 +122,7 @@ function getGrades(table) {
     }
     grades[[course, course_part]].push(test);
   }
+
   return grades;
 }
 
@@ -136,6 +130,9 @@ async function getGradesNotSeen(newCourses) {
   var p = new Promise(function(resolve, reject) {
     var gradesNotSeen = {};
     chrome.storage.sync.get("grades", ({ grades }) => {
+      if (grades === undefined) {
+        grades = {};
+      }
       for (newCourse in newCourses) {
         var newGrades = newCourses[newCourse];
         newGrades.forEach(newGrade => {
@@ -181,6 +178,12 @@ function setStatus(text) {
 
 function showGrades(grades) {
   document.getElementById('dataDiv').firstChild?.remove();
+
+  if (Object.entries(grades).length == 0) {
+    setStatus("No grades...");
+    return;
+  }
+
   var table = document.createElement('table');
   for (var course in grades) {
     var th = document.createElement('th');
@@ -214,6 +217,9 @@ function showGrades(grades) {
 async function setAsSeen(course, grade) {
   var p = new Promise(function(resolve, reject) {
     chrome.storage.sync.get("grades", ({ grades }) => {
+      if (grades === undefined) {
+        grades = {};
+      }
       if (!grades[course]) {
         grades[course] = [];
       }
