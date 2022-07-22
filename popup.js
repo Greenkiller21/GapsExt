@@ -1,4 +1,3 @@
-const VERSION = 1.0;
 const WEBSITE = 'https://gaps.heig-vd.ch';
 const URL = WEBSITE + '/consultation/controlescontinus/consultation.php';
 const COOKIE_GAPS = {
@@ -12,7 +11,6 @@ var newGradesList = {};
 config();
 
 async function config() {
-  await checkVersion();
   await reloadSettings();
   await reloadGapsGrades();
 }
@@ -25,8 +23,8 @@ async function reloadSettings() {
   });
 
   var obj = await p;
-  username = obj.usr;
-  password = obj.pwd;
+  username = atob(obj.usr);
+  password = atob(obj.pwd);
 }
 
 async function reloadGapsGrades() {
@@ -283,32 +281,6 @@ async function setAsSeen(course, grade) {
       }
       grades[course].push(hashGrade(grade));
       chrome.storage.local.set({ grades });
-      resolve();
-    });
-  });
-
-  return p;
-}
-
-async function checkVersion() {
-  var p = new Promise(function(resolve, reject) {
-    chrome.storage.local.get("version", ({ version }) => {
-      if (version === undefined) {
-        version = 0.0;
-      }
-
-      if (version === VERSION) {
-        resolve();
-        return;
-      }
-
-      if (version < 1.0) {
-        chrome.storage.local.remove("grades");
-        
-        version = 1.0;
-      }
-
-      chrome.storage.local.set({ version });
       resolve();
     });
   });

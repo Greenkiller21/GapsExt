@@ -10,16 +10,17 @@ btnOk.addEventListener('click', async () => {
 
 function loadInputs() {
   chrome.storage.local.get("loginInfos", ({ loginInfos }) => {
-    valUsr.value = loginInfos.usr;
-    valPwd.value = loginInfos.pwd;
+    valUsr.value = atob(loginInfos.usr);
+    valPwd.value = atob(loginInfos.pwd);
   });
 }
 
 function submitInputs() {
   let loginInfos = {
-    usr: valUsr.value,
-    pwd: valPwd.value
+    usr: btoa(valUsr.value),
+    pwd: btoa(valPwd.value)
   };
 
   chrome.storage.local.set({ loginInfos });
 }
+
