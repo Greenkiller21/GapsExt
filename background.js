@@ -11,13 +11,6 @@ chrome.runtime.onInstalled.addListener(async () => {
     }
   });
 
-  chrome.storage.sync.get("grades", ({ grades }) => {
-    if (!grades) {
-      grades = {}
-      chrome.storage.sync.set({ grades });
-    }
-  });
-
   /*var popups = chrome.extension.getViews({type: "popup"});
   if (popups.length > 0) {
     var gradesCount = await popups[0].reloadGapsGrades();
