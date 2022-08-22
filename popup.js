@@ -95,9 +95,13 @@ function removeAllCookies(cookieType) {
 }
 
 function getGrades(table) {
+  var grades = {};
+  if (table === undefined) {
+    return grades;
+  }
+
   var rows = table.rows;
 
-  var grades = {};
 
   var course = undefined;
   var course_part = undefined;
