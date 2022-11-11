@@ -52,6 +52,10 @@ async function checkVersion() {
         version = 1.1;
       }
 
+      if (version < VERSION) {
+        version = VERSION;
+      }
+
       chrome.storage.local.set({ version });
       resolve();
     });
