@@ -120,7 +120,7 @@ function getGrades(table) {
       test = {
         date: row.cells[0].textContent,
         name: row.cells[1].textContent,
-        //moyenneClasse: row.cells[2].textContent,
+        avg:  row.cells[2].textContent,
         coef: row.cells[3].textContent,
         mark: row.cells[4].textContent
       }
@@ -175,7 +175,14 @@ function contains(tab, def) {
 }
 
 function hashGrade(grade) {
-  return hashString(JSON.stringify(grade));
+  gradeToHash = {
+    date: grade.date,
+    name: grade.name,
+    coef: grade.coef,
+    mark: grade.mark
+  };
+  
+  return hashString(JSON.stringify(gradeToHash));
 }
 
 function getHtmlFromText(text) {
@@ -199,6 +206,12 @@ function gradesLength(grades) {
     }
   });
   return length;
+}
+
+function createTdWithText(text) {
+  var td = document.createElement('td');
+  td.innerText = text;
+  return td;
 }
 
 function showGrades(grades) {
@@ -247,11 +260,20 @@ function showGrades(grades) {
     table.appendChild(th);
     grades[course].forEach(grade => {
       var tr = document.createElement('tr');
-      for (var info in grade) {
-        var td = document.createElement('td');
-        td.innerText = grade[info];
-        tr.appendChild(td);
-      }
+
+      tr.appendChild(createTdWithText(grade.date));
+      tr.appendChild(createTdWithText(grade.name));
+      tr.appendChild(createTdWithText(grade.coef));
+      var tdMark = createTdWithText(grade.mark);
+      tdMark.classList.add("tooltip");
+
+      var spanTooltip = document.createElement("span");
+      spanTooltip.classList.add("tooltiptext");
+      spanTooltip.innerText = "avg: " + grade.avg;
+
+      tdMark.appendChild(spanTooltip);
+      tr.appendChild(tdMark);
+
       var td = document.createElement('td');
       var i = document.createElement('input');
       i.type = 'button';
