@@ -1,4 +1,4 @@
-const VERSION = 1.3;
+const VERSION = 1.4;
 
 console.clear();
 
@@ -8,8 +8,18 @@ chrome.runtime.onInstalled.addListener(async () => {
       loginInfos = {
         usr: '',
         pwd: ''
-      }
+      };
       chrome.storage.local.set({ loginInfos });
+    }
+  });
+
+  chrome.storage.local.get("options", ({ options }) => {
+    if (!options) {
+      options = {
+        redirectAfterLogin: true,
+        removeForceDownload: true
+      };
+      chrome.storage.local.set({ options });
     }
   });
 

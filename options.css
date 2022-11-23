@@ -1,20 +1,31 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&display=swap');
 
-
-*{
+* {
    font-family: 'Montserrat', sans-serif;
    margin: 0px;
    padding: 0px;
+   font-size: 1rem;
 }
 
-.main{
+.imgBackground {
+   height: 100vh;
+   width: 100vw;
+   position: fixed;
+}
+
+.imgBackground svg {
+   position: fixed;
+   bottom: 0;
+   right: 0;
+}
+
+.main {
    display: flex;
-   height: 100%;
-   width: 100%;
+   flex-direction: column;
    backdrop-filter: blur(3rem);
 }
 
-.LoginCard{
+.LoginCard {
    display: flex;
    flex-direction: column;
    background-color: white;
@@ -23,7 +34,8 @@
    border-radius: 1rem;
    position: relative;
 }
-.loginTitle{
+
+.loginTitle {
    display: flex;
    justify-content: center;
    margin-bottom: 2rem;
@@ -33,19 +45,20 @@
    font-weight: bold;
    color: #0099ff;
 }
-body{
+
+body {
    height: 100vh;
    width: 100vw;
    position: absolute;
    bottom: 0px;
 
    background-color: rgb(44, 44, 44);
+   overflow-x: hidden;
 }
 
-input{
+input {
    padding: .75rem;
    margin:  .75rem;
-   font-size: 1rem;
    border-radius: 0.5rem;
 }
 
@@ -80,10 +93,152 @@ input[type=submit]:hover {
    border: 3px solid #0099ff;  
 }
 
+/* CSS for switch START */
 
-
-svg{
-   position: fixed;
-   bottom: 0;
+.switch {
+   position: relative;
+   display: inline-block;
+   width: 60px;
+   height: 34px;
+ }
+ 
+ .switch input { 
+   opacity: 0;
+   width: 0;
+   height: 0;
+ }
+ 
+ .slider {
+   position: absolute;
+   cursor: pointer;
+   top: 0;
+   left: 0;
    right: 0;
+   bottom: 0;
+   background-color: #ccc;
+   -webkit-transition: .4s;
+   transition: .4s;
+ }
+ 
+ .slider:before {
+   position: absolute;
+   content: "";
+   height: 26px;
+   width: 26px;
+   left: 4px;
+   bottom: 4px;
+   background-color: white;
+   -webkit-transition: .4s;
+   transition: .4s;
+ }
+ 
+ input:checked + .slider {
+   background-color: #2196F3;
+ }
+ 
+ input:focus + .slider {
+   box-shadow: 0 0 1px #2196F3;
+ }
+ 
+ input:checked + .slider:before {
+   -webkit-transform: translateX(26px);
+   -ms-transform: translateX(26px);
+   transform: translateX(26px);
+ }
+ 
+ /* Rounded sliders */
+ .slider.round {
+   border-radius: 34px;
+ }
+ 
+ .slider.round:before {
+   border-radius: 50%;
+ }
+
+ /* CSS for switch END */
+
+ /* CSS for tooltip START */
+ .tooltip {
+   position: relative;
 }
+
+.tooltiptext {
+   visibility: hidden;
+   width: 300px;
+   background-color: black;
+   color: #fff;
+   text-align: center;
+   border-radius: 6px;
+   padding: 2px 0;
+   position: absolute;
+   z-index: 1;
+   bottom: 110%;
+   left: -40%;
+}
+
+.tooltiptext::after {
+   content: "";
+   position: absolute;
+   top: 100%;
+   left: 50%;
+   margin-left: -5px;
+   border-width: 5px;
+   border-style: solid;
+   border-color: black transparent transparent transparent;
+}
+
+.tooltip:hover .tooltiptext {
+   visibility: visible;
+}
+
+/* CSS for tooltip END */
+
+/* CSS for snackbar START */
+
+/* The snackbar - position it at the bottom and in the middle of the screen */
+#snackbar {
+   visibility: hidden; /* Hidden by default. Visible on click */
+   min-width: 250px; /* Set a default minimum width */
+   margin-left: -125px; /* Divide value of min-width by 2 */
+   background-color: #333; /* Black background color */
+   color: #fff; /* White text color */
+   text-align: center; /* Centered text */
+   border-radius: 2px; /* Rounded borders */
+   padding: 16px; /* Padding */
+   position: fixed; /* Sit on top of the screen */
+   z-index: 1; /* Add a z-index if needed */
+   left: 50%; /* Center the snackbar */
+   bottom: 30px; /* 30px from the bottom */
+ }
+ 
+ /* Show the snackbar when clicking on a button (class added with JavaScript) */
+ #snackbar.show {
+   visibility: visible; /* Show the snackbar */
+   /* Add animation: Take 0.5 seconds to fade in and out the snackbar.
+   However, delay the fade out process for 2.5 seconds */
+   -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+   animation: fadein 0.5s, fadeout 0.5s 2.5s;
+ }
+ 
+ /* Animations to fade the snackbar in and out */
+ @-webkit-keyframes fadein {
+   from {bottom: 0; opacity: 0;}
+   to {bottom: 30px; opacity: 1;}
+ }
+ 
+ @keyframes fadein {
+   from {bottom: 0; opacity: 0;}
+   to {bottom: 30px; opacity: 1;}
+ }
+ 
+ @-webkit-keyframes fadeout {
+   from {bottom: 30px; opacity: 1;}
+   to {bottom: 0; opacity: 0;}
+ }
+ 
+ @keyframes fadeout {
+   from {bottom: 30px; opacity: 1;}
+   to {bottom: 0; opacity: 0;}
+ }
+
+/* CSS for snackbar END */
